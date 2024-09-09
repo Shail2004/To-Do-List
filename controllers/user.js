@@ -50,6 +50,7 @@ export const getMyProfile = (req, res) => {
   });
 };
 
+//Delete the cookie, hence logging the user out
 export const logout = (req, res) => {
   res.status(200).cookie("token","",{expires:new Date(Date.now())}).json({
     success: true,
