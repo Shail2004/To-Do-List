@@ -1,6 +1,5 @@
 import express from "express";
 import {
-  getAllUsers,
   register,
   login,
   getMyProfile,
@@ -10,18 +9,16 @@ import { isAuthenticated } from "../middlewares/auth.js";
 
 const router = express.Router();
 
-// Route to get all users from the database
-router.get("/all", getAllUsers);
-
 // Route to create a new user (register)
 router.post("/new", register);
 
 // Route to create a new user (register)
 router.get("/login", login);
 
-// Routes to get user details by ID
-router.get("/me", isAuthenticated, getMyProfile);
-
+//Route to logout the user
 router.get("/logout", logout)
+
+// Route to get user details by ID
+router.get("/me", isAuthenticated, getMyProfile);
 
 export default router;

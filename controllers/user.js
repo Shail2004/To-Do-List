@@ -1,45 +1,38 @@
-import jwt from "jsonwebtoken";
 import { User } from "../models/user.js";
 import bcrypt from "bcrypt";
 import { sendCookie } from "../utils/features.js";
 
-// Get all users from the database
-export const getAllUsers = async (req, res) => {};
-
 // Register a new user
 export const register = async (req, res) => {
-  const { name, email, password } = req.body;
-  let user = await User.findOne({ email });
-  if (user)
-    return res.status(404).json({
-      success: false,
-      message: "User Already Exists",
-    });
+  try {
+    const { name, email, password } = req.body;
 
-  const hashedPassword = await bcrypt.hash(password, 10);
-  user = await User.create({ name, email, password: hashedPassword });
-  sendCookie(user, res, "Registered Successfully", 201);
+    let user = await User.findOne({ email });
+    if (user) return next(new ErrorHandler("User Already Exists", 400));
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    user = await User.create({ name, email, password: hashedPassword });
+    sendCookie(user, res, "Registered Successfully", 201);
+  } catch (error) {
+    next(error);
+  }
 };
 
 // Verify login credentials
 export const login = async (req, res) => {
-  const { email, password } = req.body;
-  let user = await User.findOne({ email }).select("+password");
-  if (!user)
-    return res.status(404).json({
-      success: false,
-      message: "Invalid Credentials",
-    });
+  try {
+    const { email, password } = req.body;
 
-  const isMatch = await bcrypt.compare(password, user.password);
+    let user = await User.findOne({ email }).select("+password");
+    if (!user) return next(new ErrorHandler("Invalid Credentials", 400));
 
-  if (!isMatch)
-    return res.status(404).json({
-      success: false,
-      message: "Invalid Credentials",
-    });
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) return next(new ErrorHandler("Invalid Credentials", 400));
 
-  sendCookie(user, res, `Welcome back, ${user.name}`, 201);
+    sendCookie(user, res, `Welcome back, ${user.name}`, 201);
+  } catch (error) {
+    next(error);
+  }
 };
 
 // Get details of a specific user by ID
@@ -52,8 +45,11 @@ export const getMyProfile = (req, res) => {
 
 //Delete the cookie, hence logging the user out
 export const logout = (req, res) => {
-  res.status(200).cookie("token","",{expires:new Date(Date.now())}).json({
-    success: true,
-    message: "Succesfully logged out",
-  });
+  res
+    .status(200)
+    .cookie("token", "", { expires: new Date(Date.now()) })
+    .json({
+      success: true,
+      message: "Succesfully logged out",
+    });
 };
