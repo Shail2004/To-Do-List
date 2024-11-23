@@ -13,7 +13,7 @@ const router = express.Router();
 router.post("/new", register);
 
 // Route to create a new user (register)
-router.get("/login", login);
+router.post("/login", login);
 
 //Route to logout the user
 router.get("/logout", logout)
